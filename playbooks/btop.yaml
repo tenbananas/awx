@@ -1,4 +1,5 @@
 - hosts: all
+  become: true
   tasks:
     - name: "Update system"
       ansible.builtin.apt:
