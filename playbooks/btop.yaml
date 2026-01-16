@@ -1,0 +1,16 @@
+- hosts: all
+  tasks:
+    - name: "Update system"
+      ansible.builtin.apt:
+        update_cache: true
+        force_apt_get: true
+        cache_valid_time: 3600
+
+    - name: "Install some tools"
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - btop
+      retries: 50
+      delay: 5
