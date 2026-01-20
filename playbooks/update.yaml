@@ -1,0 +1,41 @@
+---
+- name: "Updates"
+  become: true
+  hosts: all
+  tasks:
+    - name: "Update system"
+      ansible.builtin.apt:
+        update_cache: true
+        force_apt_get: true
+        cache_valid_time: 3600
+
+    - name: "Upgrade system"
+      ansible.builtin.apt:
+        upgrade: dist
+        force_apt_get: true
+
+    - name: "Tooling"
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - htop
+        - tree
+        - net-tools
+        - ncdu
+        - jq
+      retries: 50
+      delay: 5
+
+    - name: "Update Message of the Day Warning"
+      ansible.builtin.copy:
+        content: |
+          #!/bin/sh
+          cat <<EOF
+          $(printf '%b' "\033[7m")
+          ####################### NEVER MANUALLY MODIFY CONFIGURATION #######################
+          ###################################################################################
+          $(printf '%b' "\033[27m")
+          EOF
+        dest: /etc/update-motd.d/20-warning
+        mode: a+x
