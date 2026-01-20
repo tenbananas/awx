@@ -39,3 +39,17 @@
           EOF
         dest: /etc/update-motd.d/20-warning
         mode: a+x
+        
+    - name: "Check /etc/motd"
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: motd_file
+      when: ansible_os_family == "Debian"
+
+    - name: "Rename /etc/motd to /etc/motd.bak"
+      ansible.builtin.command:
+        cmd: mv /etc/motd /etc/motd.bak
+      when: 
+        - ansible_os_family == "Debian"
+        - motd_file.stat.exists
+        - not motd_file.stat.islnk      
