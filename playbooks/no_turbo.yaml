@@ -1,0 +1,33 @@
+---
+- name: "Systemd"
+  hosts: all
+  become: true
+  tasks:
+    - name: "Disable turbo"
+      block:
+        - name: "Create service"
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/cpu-performance.service
+            content: |
+              [Unit]
+              Description=Disable turbo (no_turbo & max_perf)
+              After=multi-user.target
+    
+              [Service]
+              Type=oneshot
+              ExecStart=/bin/sh -c 'echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo && echo 70 > /sys/devices/system/cpu/intel_pstate/max_perf_pct'
+              RemainAfterExit=yes
+    
+              [Install]
+              WantedBy=multi-user.target
+            mode: '0644'
+    
+        - name: "Reload daemon"
+          ansible.builtin.systemd:
+            daemon_reload: yes
+    
+        - name: "Enable service"
+          ansible.builtin.systemd:
+            name: cpu-performance.service
+            enabled: yes
+            state: started
